@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
           ),
         ),  
       ),
-      initialRoute: 'login',
+      initialRoute: 'chat',
       routes: appRoutes,
     );
   }
