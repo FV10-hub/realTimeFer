@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:real_time_chat/helpers/mostrar_alertas.dart';
+import 'package:real_time_chat/services/auth_services.dart';
 import 'package:real_time_chat/widgets/boton_azul.dart';
 
 import 'package:real_time_chat/widgets/custom_input.dart';
@@ -20,7 +23,11 @@ class RegisterPage extends StatelessWidget {
                 children: [
                   Logo(titulo: 'Registrarse'),
                   _Form(),
-                  Labels(ruta:'login',titulo: 'Ya tengo una cuenta',subTitulo: 'Regresar al Login',),
+                  Labels(
+                    ruta: 'login',
+                    titulo: 'Ya tengo una cuenta',
+                    subTitulo: 'Regresar al Login',
+                  ),
                   Text(
                     'Terminos y condiciones',
                     style: TextStyle(fontWeight: FontWeight.w200),
@@ -45,6 +52,7 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authaservice = Provider.of<AuthServices>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -71,9 +79,21 @@ class _FormState extends State<_Form> {
           // TODO: Crear boton login
           BotonAzul(
               text: 'Registrarse',
-              OnPressed: () {
-                print(ctlEmail.text);
-              })
+              OnPressed: authaservice.autenticando
+                  ? null
+                  : () async {
+                      FocusScope.of(context).unfocus();
+                      final registroOk = await authaservice.register(
+                          ctlName.text.trim(),
+                          ctlEmail.text.trim(),
+                          ctlPass.text.trim());
+                      if (registroOk == true) {
+                        Navigator.pushReplacementNamed(context, 'usuarios');
+                      } else {
+                        mostrarDialogo(
+                            context, 'Registro Incorrecto', registroOk);
+                      }
+                    })
         ],
       ),
     );

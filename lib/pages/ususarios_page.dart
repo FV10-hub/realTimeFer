@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:real_time_chat/models/usuario.dart';
+import 'package:real_time_chat/services/auth_services.dart';
 
 class UsuariosPage extends StatefulWidget {
   @override
@@ -8,25 +10,26 @@ class UsuariosPage extends StatefulWidget {
 }
 
 class _UsuariosPageState extends State<UsuariosPage> {
-
-   RefreshController _refreshController =
-   RefreshController(initialRefresh: false);
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
 
   final usuarios = [
-    Usuario(conectado: true, email: 'test1@abc.com',nombre: 'Maria', uid: '1'),
-    Usuario(conectado: true, email: 'test2@abc.com',nombre: 'Fernando', uid: '2'),
-    Usuario(conectado: true, email: 'test3@abc.com',nombre: 'Ariel', uid: '3'),
-    Usuario(conectado: false, email: 'test4@abc.com',nombre: 'Diego', uid: '4'),
-    Usuario(conectado: true, email: 'test5@abc.com',nombre: 'Victor', uid: '5'),
-    Usuario(conectado: true, email: 'test6@abc.com',nombre: 'Yessi', uid: '6'),
+    Usuario(online: true, email: 'test1@abc.com', nombre: 'Maria', uid: '1'),
+    Usuario(online: true, email: 'test2@abc.com', nombre: 'Fernando', uid: '2'),
+    Usuario(online: true, email: 'test3@abc.com', nombre: 'Ariel', uid: '3'),
+    Usuario(online: false, email: 'test4@abc.com', nombre: 'Diego', uid: '4'),
+    Usuario(online: true, email: 'test5@abc.com', nombre: 'Victor', uid: '5'),
+    Usuario(online: true, email: 'test6@abc.com', nombre: 'Yessi', uid: '6'),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthServices>(context);
+    final usuario = authService.usuario;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Mi nombre',
+          usuario.nombre,
           style: TextStyle(color: Colors.black54),
         ),
         elevation: 1,
@@ -36,7 +39,10 @@ class _UsuariosPageState extends State<UsuariosPage> {
             Icons.exit_to_app,
             color: Colors.black54,
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, 'login');
+            AuthServices.deleteToke();
+          },
         ),
         actions: [
           Container(
@@ -58,7 +64,6 @@ class _UsuariosPageState extends State<UsuariosPage> {
         onRefresh: _cargarUsuarios,
         enablePullDown: true,
         enablePullUp: true,
-
         child: _usuarioListView(),
       ),
     );
@@ -75,26 +80,25 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   ListTile usuarioListTile(Usuario usuario) {
     return ListTile(
-        title: Text(usuario.nombre),
-        leading: CircleAvatar(
-          child: Text(usuario.nombre.substring(0,2)),
-          backgroundColor: Colors.blue[100],
+      title: Text(usuario.nombre),
+      leading: CircleAvatar(
+        child: Text(usuario.nombre.substring(0, 2)),
+        backgroundColor: Colors.blue[100],
+      ),
+      trailing: Container(
+        height: 10,
+        width: 10,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(100),
+          color: usuario.online ? Colors.green : Colors.red,
         ),
-        trailing: Container(
-          height: 10,
-          width: 10,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100),
-            color: usuario.conectado ? Colors.green : Colors.red,
-          ),
-          ),
-      );
+      ),
+    );
   }
 
-  _cargarUsuarios() async{
+  _cargarUsuarios() async {
     await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
   }
-
 }

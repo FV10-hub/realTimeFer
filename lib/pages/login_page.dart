@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:real_time_chat/widgets/boton_azul.dart';
+import 'package:provider/provider.dart';
+import 'package:real_time_chat/helpers/mostrar_alertas.dart';
 
+import 'package:real_time_chat/services/auth_services.dart';
+
+import 'package:real_time_chat/widgets/boton_azul.dart';
 import 'package:real_time_chat/widgets/custom_input.dart';
 import 'package:real_time_chat/widgets/labels.dart';
 import 'package:real_time_chat/widgets/logo.dart';
 
-class LogingPage extends StatelessWidget {
+class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,9 +22,15 @@ class LogingPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Logo(titulo: 'Mensajeria Fer',),
+                  Logo(
+                    titulo: 'Mensajeria Fer',
+                  ),
                   _Form(),
-                  Labels(ruta:'register',titulo: 'No tienes una Cuenta?',subTitulo: 'Crea una Ahora',),
+                  Labels(
+                    ruta: 'register',
+                    titulo: 'No tienes una Cuenta?',
+                    subTitulo: 'Crea una Ahora',
+                  ),
                   Text(
                     'Terminos y condiciones',
                     style: TextStyle(fontWeight: FontWeight.w200),
@@ -44,6 +54,7 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthServices>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -64,9 +75,20 @@ class _FormState extends State<_Form> {
           // TODO: Crear boton login
           BotonAzul(
               text: 'Ingrese',
-              OnPressed: () {
-                print(ctlEmail.text);
-              })
+              OnPressed: authService.autenticando
+                  ? null
+                  : () async {
+                      FocusScope.of(context)
+                          .unfocus(); //esto hace que pierda el foco y oculte el teclado
+                      final loginOk = await authService.login(
+                          ctlEmail.text.trim(), ctlPass.text.trim());
+                      if (loginOk) {
+                        Navigator.pushReplacementNamed(context, 'usuarios');
+                      } else {
+                        mostrarDialogo(context, 'Login Incorrecto',
+                            'Verifique de nuevo sus datos');
+                      }
+                    })
         ],
       ),
     );
