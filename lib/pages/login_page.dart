@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:real_time_chat/helpers/mostrar_alertas.dart';
 
 import 'package:real_time_chat/services/auth_services.dart';
+import 'package:real_time_chat/services/socket_services.dart';
 
 import 'package:real_time_chat/widgets/boton_azul.dart';
 import 'package:real_time_chat/widgets/custom_input.dart';
@@ -55,6 +56,7 @@ class _FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthServices>(context);
+    final socketService = Provider.of<SocketService>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -83,6 +85,7 @@ class _FormState extends State<_Form> {
                       final loginOk = await authService.login(
                           ctlEmail.text.trim(), ctlPass.text.trim());
                       if (loginOk) {
+                        socketService.connect();
                         Navigator.pushReplacementNamed(context, 'usuarios');
                       } else {
                         mostrarDialogo(context, 'Login Incorrecto',
